@@ -1,0 +1,17 @@
+{
+    "code": "def map_user_ids_to_names(users):\n    
+      user_map = {user['id']: user['name'] for user in users}\n
+      return user_map",
+    "example_usage": {
+        "input": [
+            {"id": 1, "name": "Alice"},
+            {"id": 2, "name": "Bob"},
+            {"id": 3, "name": "Charlie"}
+        ],
+        "output": {
+            "1": "Alice",
+            "2": "Bob",
+            "3": "Charlie"
+        }
+    }
+}
