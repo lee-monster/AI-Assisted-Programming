@@ -1,0 +1,89 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+
+const calculateSMA = (data, period) => {
+  const sma = [];
+  for (let i = 0; i < data.length; i++) {
+    if (i < period - 1) {
+      sma.push({ date: data[i].date, sma: null });
+    } else {
+      const sum = data.slice(i - period + 1, i + 1).reduce((acc, val) => acc + val.price, 0);
+      sma.push({ date: data[i].date, sma: sum / period });
+    }
+  }
+  return sma;
+};
+
+const calculateBollingerBands = (data, period = 20, multiplier = 2) => {
+  const sma = calculateSMA(data, period);
+  return sma.map((entry, index) => {
+    if (index < period - 1) {
+      return { ...entry, upper: null, lower: null };
+    } else {
+      const slice = data.slice(index - period + 1, index + 1);
+      const sum = slice.reduce((acc, val) => acc + Math.pow(val.price - entry.sma, 2), 0);
+      const std = Math.sqrt(sum / period);
+      return {
+        ...entry,
+        upper: entry.sma + multiplier * std,
+        lower: entry.sma - multiplier * std
+      };
+    }
+  });
+};
+
+const AppleStockChart = () => {
+  const [data, setData] = useState([]);
+  const [showBollinger, setShowBollinger] = useState(false);
+
+  useEffect(() => {
+    // 이 부분은 실제 데이터를 사용할 때 수정해야 합니다.
+    // 여기서는 더미 데이터를 생성합니다.
+    const dummyData = Array.from({ length: 1000 }, (_, i) => ({
+      date: `2024-${String(i % 12 + 1).padStart(2, '0')}-${String(i % 30 + 1).padStart(2, '0')}`,
+      price: 100 + Math.random() * 100
+    }));
+    setData(dummyData);
+  }, []);
+
+  const sampledData = useMemo(() => {
+    // 데이터 샘플링: 1000개 데이터 포인트마다 1개씩 선택
+    return data.filter((_, index) => index % 10 === 0);
+  }, [data]);
+
+  const bollingerBands = useMemo(() => calculateBollingerBands(sampledData), [sampledData]);
+
+  const chartData = useMemo(() => {
+    return sampledData.map((item, index) => ({
+      ...item,
+      ...bollingerBands[index]
+    }));
+  }, [sampledData, bollingerBands]);
+
+  return (
+    <div style={{ width: '100%', height: 400 }}>
+      <ResponsiveContainer>
+        <LineChart data={chartData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" />
+          <YAxis domain={['auto', 'auto']} />
+          <Tooltip />
+          <Legend />
+          <Line type="monotone" dataKey="price" stroke="#8884d8" dot={false} name="Price" />
+          {showBollinger && (
+            <>
+              <Line type="monotone" dataKey="sma" stroke="#82ca9d" dot={false} name="SMA" />
+              <Line type="monotone" dataKey="upper" stroke="#ff7300" dot={false} name="Upper Band" />
+              <Line type="monotone" dataKey="lower" stroke="#ff7300" dot={false} name="Lower Band" />
+            </>
+          )}
+        </LineChart>
+      </ResponsiveContainer>
+      <button onClick={() => setShowBollinger(!showBollinger)}>
+        {showBollinger ? 'Hide' : 'Show'} Bollinger Bands
+      </button>
+    </div>
+  );
+};
+
+export default AppleStockChart;
