@@ -1,0 +1,77 @@
+import React, { useState, useEffect } from 'react';
+
+const WoodTesseract = () => {
+  const [rotation, setRotation] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setRotation(prev => (prev + 0.5) % 360);
+    }, 50);
+    return () => clearInterval(interval);
+  }, []);
+
+  const size = 600;
+  const center = size / 2;
+
+  const woodColors = [
+    '#8B4513', '#A0522D', '#CD853F', '#DEB887', '#D2691E', '#FFDAB9'
+  ];
+
+  const createFrame = (index, totalFrames) => {
+    const scale = 1 - (index / totalFrames) * 0.8;
+    const offset = (1 - scale) * center;
+    const color = woodColors[index % woodColors.length];
+
+    return (
+      <rect
+        key={index}
+        x={offset}
+        y={offset}
+        width={size * scale}
+        height={size * scale}
+        fill="none"
+        stroke={color}
+        strokeWidth={2}
+        transform={`rotate(${rotation * (1 + index * 0.1)}, ${center}, ${center})`}
+      />
+    );
+  };
+
+  const createDiagonal = (index, totalDiagonals) => {
+    const progress = index / totalDiagonals;
+    const startX = center * (1 - progress);
+    const startY = center * progress;
+    const endX = size - startX;
+    const endY = size - startY;
+    const color = woodColors[index % woodColors.length];
+
+    return (
+      <line
+        key={`diagonal-${index}`}
+        x1={startX}
+        y1={startY}
+        x2={endX}
+        y2={endY}
+        stroke={color}
+        strokeWidth={1}
+        opacity={0.5}
+      />
+    );
+  };
+
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{background: '#2C1B0E'}}>
+      <defs>
+        <filter id="wood-texture">
+          <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" />
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="5" />
+        </filter>
+      </defs>
+      {[...Array(30)].map((_, i) => createFrame(i, 30))}
+      {[...Array(20)].map((_, i) => createDiagonal(i, 20))}
+      <rect x="0" y="0" width={size} height={size} fill="none" filter="url(#wood-texture)" />
+    </svg>
+  );
+};
+
+export default WoodTesseract;
