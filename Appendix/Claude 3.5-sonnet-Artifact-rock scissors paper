@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가위바위보 게임 - 이집트 테마</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        #svg-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        #game-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #game-content {
+            background-color: rgba(255, 248, 220, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #8B4513;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+        #choices {
+            margin: 25px 0;
+        }
+        button {
+            font-size: 22px;
+            margin: 0 15px;
+            padding: 12px 25px;
+            cursor: pointer;
+            background-color: #DEB887;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+        button:hover {
+            background-color: #D2691E;
+            transform: scale(1.05);
+        }
+        #result {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 25px;
+            color: #8B4513;
+        }
+        #score {
+            margin-top: 25px;
+            font-size: 20px;
+            color: #A0522D;
+        }
+    </style>
+</head>
+<body>
+    <svg id="svg-background" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid slice">
+        <!-- Sky -->
+        <defs>
+            <linearGradient id="sky-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" style="stop-color:#87CEEB;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#E0F6FF;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#sky-gradient)"/>
+
+        <!-- Sun -->
+        <circle cx="900" cy="100" r="60" fill="#FFD700"/>
+
+        <!-- Desert -->
+        <rect x="0" y="400" width="1000" height="200" fill="#F4A460"/>
+
+        <!-- Pyramids -->
+        <polygon points="200,400 350,200 500,400" fill="#D2691E"/>
+        <polygon points="400,400 550,250 700,400" fill="#CD853F"/>
+
+        <!-- Sphinx -->
+        <path d="M750,400 Q800,350 850,400 L850,450 Q800,430 750,450 Z" fill="#DEB887"/>
+        <path d="M770,400 Q800,380 830,400 L830,420 Q800,410 770,420 Z" fill="#D2691E"/>
+
+        <!-- Palm trees -->
+        <g transform="translate(100,380) scale(0.5)">
+            <rect x="-10" y="0" width="20" height="60" fill="#8B4513"/>
+            <path d="M0,0 Q-40,-40 -60,-20 Q-40,-40 -20,-60 Q0,-40 20,-60 Q40,-40 60,-20 Q40,-40 0,0" fill="#228B22"/>
+        </g>
+        <g transform="translate(900,380) scale(0.5)">
+            <rect x="-10" y="0" width="20" height="60" fill="#8B4513"/>
+            <path d="M0,0 Q-40,-40 -60,-20 Q-40,-40 -20,-60 Q0,-40 20,-60 Q40,-40 60,-20 Q40,-40 0,0" fill="#228B22"/>
+        </g>
+    </svg>
+    
+    <div id="game-container">
+        <div id="game-content">
+            <h1>🏺 이집트 가위바위보 게임 🐪</h1>
+            <div id="choices">
+                <button onclick="play('가위')">✌️ 가위</button>
+                <button onclick="play('바위')">✊ 바위</button>
+                <button onclick="play('보')">🖐️ 보</button>
+            </div>
+            <div id="result"></div>
+            <div id="score">
+                승: <span id="wins">0</span> | 
+                패: <span id="losses">0</span> | 
+                무: <span id="ties">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let wins = 0, losses = 0, ties = 0;
+
+        function computerChoice() {
+            const choices = ['가위', '바위', '보'];
+            return choices[Math.floor(Math.random() * 3)];
+        }
+
+        function play(playerChoice) {
+            const computer = computerChoice();
+            let result;
+
+            if (playerChoice === computer) {
+                result = "무승부!";
+                ties++;
+            } else if (
+                (playerChoice === '가위' && computer === '보') ||
+                (playerChoice === '바위' && computer === '가위') ||
+                (playerChoice === '보' && computer === '바위')
+            ) {
+                result = "승리!";
+                wins++;
+            } else {
+                result = "패배!";
+                losses++;
+            }
+
+            document.getElementById('result').innerHTML = `
+                당신의 선택: ${playerChoice}<br>
+                컴퓨터의 선택: ${computer}<br>
+                결과: ${result}
+            `;
+
+            updateScore();
+        }
+
+        function updateScore() {
+            document.getElementById('wins').textContent = wins;
+            document.getElementById('losses').textContent = losses;
+            document.getElementById('ties').textContent = ties;
+        }
+    </script>
+</body>
+</html>
